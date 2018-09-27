@@ -29,17 +29,17 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void create(View view) {
-        if (ShortcutHelper.isShortCutExist(this, "测试", intent)) {
+        if (ShortcutHelper.isShortcutExist(this, "测试", intent)) {
             Toast.makeText(this, "已存在", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        ShortcutHelper.addShortCut(this, "测试", intent, true,
+        ShortcutHelper.addShortcut(this, "测试", intent, true,
                 BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
     }
 
     public void isExist(View view) {
-        if (ShortcutHelper.isShortCutExist(this, "测试", intent)) {
+        if (ShortcutHelper.isShortcutExist(this, "测试", intent)) {
             Toast.makeText(this, "已存在", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "不存在", Toast.LENGTH_SHORT).show();

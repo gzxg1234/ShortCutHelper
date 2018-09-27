@@ -8,8 +8,8 @@ import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.os.Build;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
-
 
 import java.util.Collections;
 
@@ -24,7 +24,7 @@ import shortcut_lib.ShortcutUtils;
 public class ShortcutHelper {
 
     @TargetApi(Build.VERSION_CODES.O)
-    private static boolean isShortCutExist26(Context context, @NonNull String name, @NonNull Intent actionIntent) {
+    private static boolean isShortcutExist26(Context context, @NonNull String name, @NonNull Intent actionIntent) {
         ShortcutManager sm = (ShortcutManager) context.getSystemService(Context.SHORTCUT_SERVICE);
         if (sm != null) {
             if (sm.isRequestPinShortcutSupported()) {
@@ -47,12 +47,22 @@ public class ShortcutHelper {
      * @param actionIntent
      * @return
      */
-    public static boolean isShortCutExist(Context context, @NonNull String name, @NonNull Intent actionIntent) {
+    public static boolean isShortcutExist(Context context, @NonNull String name, @NonNull Intent actionIntent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return isShortCutExist26(context, name, actionIntent);
+            return isShortcutExist26(context, name, actionIntent);
         } else {
             return ShortcutSuperUtils.isShortCutExist(context, name, actionIntent);
         }
+    }
+
+    public static void addShortcut(Context context, @NonNull String name, @NonNull Intent actionIntent,
+                                   boolean duplicate, @DrawableRes int iconId) {
+        addShortcut(context, name, actionIntent, duplicate, null, iconId);
+    }
+
+    public static void addShortcut(Context context, @NonNull String name, @NonNull Intent actionIntent,
+                                   boolean duplicate, @NonNull Bitmap bitmap) {
+        addShortcut(context, name, actionIntent, duplicate, bitmap, 0);
     }
 
     /**
@@ -64,19 +74,19 @@ public class ShortcutHelper {
      * @param duplicate
      * @param icon
      */
-    public static void addShortCut(Context context, @NonNull String name, @NonNull Intent actionIntent,
-                                   boolean duplicate, @NonNull Bitmap icon) {
-
+    private static void addShortcut(Context context, @NonNull String name, @NonNull Intent actionIntent,
+                                    boolean duplicate, Bitmap icon, @DrawableRes int iconRes) {
         //android8.0使用ShortcutManager创建快捷方式
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ShortcutManager sm = (ShortcutManager) context.getSystemService(Context.SHORTCUT_SERVICE);
             if (sm != null) {
                 if (sm.isRequestPinShortcutSupported()) {
-                    if (!duplicate && isShortCutExist26(context, name, actionIntent)) {
+                    if (!duplicate && isShortcutExist26(context, name, actionIntent)) {
                         return;
                     }
                     ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(context, generateId(name, actionIntent))
-                            .setIcon(Icon.createWithBitmap(icon))
+                            .setIcon(icon == null ? Icon.createWithResource(context, iconRes)
+                                    : Icon.createWithBitmap(icon))
                             .setShortLabel(name)
                             .setIntent(actionIntent)
                             .build();
@@ -87,7 +97,11 @@ public class ShortcutHelper {
             if (!duplicate && ShortcutSuperUtils.isShortCutExist(context, name, actionIntent)) {
                 return;
             }
-            ShortcutUtils.addShortcut(context, actionIntent, name, duplicate, icon);
+            if (icon != null) {
+                ShortcutUtils.addShortcut(context, actionIntent, name, duplicate, icon);
+            } else {
+                ShortcutUtils.addShortcut(context, actionIntent, name, duplicate, iconRes);
+            }
         }
     }
 
